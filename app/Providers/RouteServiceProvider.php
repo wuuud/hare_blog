@@ -17,8 +17,9 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @var string
      */
-    public const HOME = '/dashboard';
-
+    public const HOME = '/';
+    // web.phpではwelcome '/'
+    // 上記はログイン後はダッシュボード画面が表示されますが、記事の一覧画面に遷移するように修正
     /**
      * The controller namespace for the application.
      *
