@@ -4,10 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Post extends Model
 {
     use HasFactory;
+
+    //DBへの登録を許可する一覧
+    protected $fillable = [
+        'title',
+        'body',
+    ];
 
     /**
      * Get the user that owns the POST
@@ -19,5 +26,12 @@ class Post extends Model
     {
         //       UserのhasMany    'foreign_key', 'other_key'(id)を削除
         return $this->belongsTo(User::class);
+    }
+    public function getImageUrlAttribute()
+    {
+        //show画面の
+        //<img src="{{ Storage::url('images/posts/' . $post->image) }}" alt="" class="mb-4">
+        //            $post->imageだがインスタンス化したものを使うので$this
+        return Storage::url('images/posts/' . $this->image);
     }
 }
