@@ -53,6 +53,10 @@ class User extends Authenticatable
         // , 'user_id', 'local_key'
         return $this->hasMany(Post::class);
     }
+  public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 
     
 }
