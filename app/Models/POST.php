@@ -32,6 +32,13 @@ class Post extends Model
         //show画面の
         //<img src="{{ Storage::url('images/posts/' . $post->image) }}" alt="" class="mb-4">
         //            $post->imageだがインスタンス化したものを使うので$this
-        return Storage::url('images/posts/' . $this->image);
+        return Storage::url($this->image_path);
+    }
+
+
+    public function getImagePathAttribute()
+    {
+        //  上記のリレーションから少し変更。
+        return 'images/posts/' . $this->image;
     }
 }
