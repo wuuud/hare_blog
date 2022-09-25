@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CommentController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 /*
@@ -35,5 +36,11 @@ Route::resource('posts', PostController::class)
 // 2.認証不要な動作
 Route::resource('posts', PostController::class)
     ->only(['show', 'index']);
+
+//3.コメント
+//コメントは記事に紐付いているため(特定の記事に対してのコメントになるため)、Route::resource('posts.comments')
+Route::resource('posts.comments', CommentController::class)
+    ->only(['create', 'store', 'edit', 'update', 'destroy'])
+    ->middleware('auth');
 
 require __DIR__.'/auth.php';

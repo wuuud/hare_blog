@@ -50,13 +50,11 @@ class User extends Authenticatable
     public function posts()
     {
         //    紐付いたデータを返す。Postモデルを返すのね。user_id userModelが紐付いているのはID
-        // , 'user_id', 'local_key'
+        //        'user_id', 'local_key'
         return $this->hasMany(Post::class);
     }
-  public function comments()
+    public function comments()
     {
         return $this->hasMany(Comment::class);
     }
-
-    
 }

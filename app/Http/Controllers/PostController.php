@@ -52,15 +52,13 @@ class PostController extends Controller
         // $request->all()がfillableの意味。
         $post = new Post($request->all());
         //                 認証したユーザー  そのID
-
         $post->user_id = $request->user()->id;
         // ？
         $file = $request->file('image');
         // ファイル名を保存  取得したときの年月日時分秒      ファイル名を取得
         //取得したときの年月日時分秒で同じファイル名が投稿されても別に保存できるように
         //$post->image = date('YmdHis') . '_' . $file->getClientOriginalName();
-
-        //一番下のアクションにprivate static function createFileNameを追加
+        //一番下のアクションにprivate static function createFileNameを追加したことで、
         //ファイル名作成方法を変更するときに1箇所アクションを変えるだけでOK
         $post->image = self::createFileName($file);
         // トランザクション開始
@@ -72,14 +70,17 @@ class PostController extends Controller
             // 画像アップロード
             if (!Storage::putFileAs('images/posts', $file, $post->image)) {
                 // 例外を投げてロールバックさせる
+                //newある！インスタンス化だ！！＄\Exception = new \Exception;
                 throw new \Exception('画像ファイルの保存に失敗しました。');
             }
-
             // トランザクション終了(成功)
             DB::commit();
+
+            //$e = Exception
         } catch (\Exception $e) {
             // トランザクション終了(失敗)
             DB::rollback();
+            // 元の画面にとどまる 元のデータを保存  コメント.＄eはtry文に記載済
             return back()->withInput()->withErrors($e->getMessage());
         }
 
@@ -126,9 +127,10 @@ class PostController extends Controller
     public function update(PostRequest $request, $id)
     {
         //対象データを1つとる.
-        //新規データと煮ているが、少しややこしい。
+        //新規データと似ているが、少しややこしい。
         $post = Post::find($id);
         //   投稿したいユーザー    このユーザーがupdateできるか、この投稿について
+        // cannotなので更新権限がなければ結果がtrue
         if ($request->user()->cannot('update', $post)) {
             //更新できなかった場合。この操作は難しい。
             return redirect()->route('posts.show', $post)

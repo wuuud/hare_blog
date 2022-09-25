@@ -27,10 +27,13 @@ class Post extends Model
         //       UserのhasMany    'foreign_key', 'other_key'(id)を削除
         return $this->belongsTo(User::class);
     }
-     public function comments()
-     {
-         return $this->hasMany(Comment::class);
-     }
+    
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+    
+    
     public function getImageUrlAttribute()
     {
         //show画面の
