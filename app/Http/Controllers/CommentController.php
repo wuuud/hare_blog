@@ -15,7 +15,6 @@ class CommentController extends Controller
      */
     public function index()
     {
-    
     }
 
     /**
@@ -89,9 +88,9 @@ class CommentController extends Controller
      * @param  \App\Models\Comment  $comment
      * @return \Illuminate\Http\Response
      */
-    public function edit(Comment $comment)
+    public function edit(Post $post, Comment $comment)
     {
-        //
+        return view('comments.edit', compact('post', 'comment'));
     }
 
     /**
@@ -101,10 +100,34 @@ class CommentController extends Controller
      * @param  \App\Models\Comment  $comment
      * @return \Illuminate\Http\Response
      */
-    public function update(CommentRequest $request, Comment $comment)
+    public function update(CommentRequest $request, Post $post, Comment $comment)
     {
-        //
+        //なりすましを確認             updateの内容は＄comment
+        if ($request->user()->cannot('update', $comment)) {
+            return redirect()->route('posts.show', $post)
+                ->withErrors('自分のコメント以外は更新できません');
+        }
+        
+        // storeから変更
+        $comment->fill($request->all());
+
+        // トランザクション使用しない  開始 DB::beginTransaction();
+        // 一時保管が必要でDBへの処理が大きい。
+        try {
+            // 更新。準備していた記事の情報を保存。
+            $comment->save();
+
+            // トランザクション終了(成功)DB::commit();
+        } catch (\Exception $e) {
+            // トランザクション終了(失敗) DB::rollback();
+            //前のページに戻る。          エラーを出す。
+            return back()->withInput()->withErrors($e->getMessage());
+        }
+        //成功した場合のreturn
+        return redirect()->route('posts.show', $post)
+            ->with('notice', 'コメントを更新しました');
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -115,5 +138,10 @@ class CommentController extends Controller
     public function destroy(Comment $comment)
     {
         //
+    }
+
+    private static function createFileName($file)
+    {
+        return date('YmdHis') . '_' . $file->getClientOriginalName();
     }
 }
