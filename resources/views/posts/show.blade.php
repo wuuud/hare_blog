@@ -7,7 +7,7 @@
             ->with('notice', '記事を登録しました'); --}}
     <div class="container lg:w-3/4 md:w-4/5 w-11/12 mx-auto my-8 px-8 py-4 bg-white shadow-md">
         <x-flash-message :message="session('notice')" />
-        
+
 
 
         {{-- @if ($errors->any())
@@ -81,14 +81,34 @@
                 </form>
             @endcan
         </div>
-        {{-- ⑧コメント用に追加 --}}
+        {{-- ⑧comment 登録追加 --}}
         @auth
             <hr class="my-4">
 
             <div class="flex justify-end">
                 {{-- comment用に作成したROUTEから  name        idの指定。URLに必要  --}}
-                <a href="{{ route('posts.comments.create', $post) }}" class="bg-indigo-400 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline block">コメント登録</a>
+                <a href="{{ route('posts.comments.create', $post) }}"
+                    class="bg-indigo-400 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline block">コメント登録</a>
             </div>
         @endauth
+
+
+        {{-- ⑨comment 一覧機能用追加 --}}
+        <section class="font-sans break-normal text-gray-900 ">
+            @foreach ($comments as $comment)
+                <div class="my-2">
+                    <span class="font-bold mr-3">{{ $comment->user->name }}</span>
+                    <span class="text-sm">{{ $comment->created_at }}</span>
+                    {{-- エスケープされないようにLaravel5では、{!! !!}で囲む必要があります。
+                    ただ、そうすると元々あったタグまでもエスケープされずに表示されるので、最初にe()でエスケープを行います。
+                    1.e() でエスケープをする
+                    2.nl2br() で改行を<br>に置き換える
+                    3.{!! !!}で、<br>だけエスケープをせずに表示する --}}
+                    <p>{!! nl2br(e($comment->body)) !!}</p>
+                </div>
+                <hr>
+            @endforeach
+        </section>
+
     </div>
 </x-app-layout>

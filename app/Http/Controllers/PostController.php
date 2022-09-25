@@ -99,9 +99,16 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        $post = Post::find($id);
-
-        return view('posts.show', compact('post'));
+        // $post = Post::find($id);
+        // ユーザー情報も取得できる 
+        $post = Post::with(['user'])->find($id);
+        // データを取得してくる
+        // withはデータを取った後は使えないので 
+        // load(['user'])で後からユーザー情報を取得 Eager loading(N＋1問題)の解決のために必要。
+        $comments = $post->comments()->latest()->get()->load(['user']);
+        // return view('posts.show', compact('post'));
+        // 下記の書き方でユーザー情報も取得できる
+        return view('posts.show', compact('post', 'comments'));
     }
 
     /**

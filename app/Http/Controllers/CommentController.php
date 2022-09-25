@@ -44,7 +44,8 @@ class CommentController extends Controller
         // $comment->save();
 
 
-        // トランザクション開始DB::beginTransaction();
+        // トランザクション開始 整合性のないことが起こらない
+        // DB::beginTransaction();
         try {
             // その記事に関する新しいコメントを登録
             // その投稿の新しいのと書くと、記事に紐付いたIDも自動的に読み取る
