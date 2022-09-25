@@ -53,7 +53,9 @@ class CommentPolicy
      */
     public function update(User $user, Comment $comment)
     {
-        //
+        // updateとdeleteのみ。文言は同じ
+        // return $user->id === $comment->user_id;
+        return $user->id === $comment->user->id;
     }
 
     /**
@@ -65,7 +67,9 @@ class CommentPolicy
      */
     public function delete(User $user, Comment $comment)
     {
-        //
+        // updateとdeleteのみ。文言は同じ
+        // return $user->id === $comment->user_id;
+        return $user->id === $comment->user->id;
     }
 
     /**

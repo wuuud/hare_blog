@@ -105,6 +105,27 @@
                     2.nl2br() で改行を<br>に置き換える
                     3.{!! !!}で、<br>だけエスケープをせずに表示する --}}
                     <p>{!! nl2br(e($comment->body)) !!}</p>
+
+                    {{-- 10 comment 編集削除 --}}
+                    <div class="flex justify-end text-center">
+                    {{-- can endcanがふたつ ①update ②delete--}}
+                        @can('update', $comment)
+                            {{-- 編集  表示出るか試しに記載しネットで確認 --}}
+                            {{--                 routeで$post記事,$commentコメントのIDの両方がほしい 
+                                                2つ欲しい場合はは配列でまとめる。routeingm自体を変更するのもあり。--}}
+                            <a href="{{ route('posts.comments.edit', [$post, $comment]) }}"
+                                class="text-sm bg-green-400 hover:bg-green-600 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline w-20 mr-2">編集</a>
+                        @endcan
+                        @can('delete', $comment)
+                            {{-- 削除 表示出るか試しに記載しネットで確認--}}
+                            <form action="{{ route('posts.comments.destroy', [$post, $comment]) }}" method="post">
+                                @csrf
+                                @method('DELETE')
+                                <input type="submit" value="削除" onclick="if(!confirm('削除しますか？')){return false};"
+                                    class="text-sm bg-red-400 hover:bg-red-600 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline w-20">
+                            </form>
+                        @endcan
+                    </div>
                 </div>
                 <hr>
             @endforeach
