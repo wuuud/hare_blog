@@ -25,6 +25,8 @@ class PostRequest extends FormRequest
     {
         //storeかupdateか確認。
         //現在のroute(sail artisan route:listの出力結果のrouteの列の値)を取得
+
+        // 
         $route = $this->route()->getName();
         // 1.storeとupdateの両方
         $rule = [

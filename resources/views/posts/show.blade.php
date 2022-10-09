@@ -9,7 +9,6 @@
         <x-flash-message :message="session('notice')" />
 
 
-
         {{-- @if ($errors->any())
             <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 my-2" role="alert">
                 <p>
@@ -47,7 +46,9 @@
             'visibility' => 'public',
             ], --}}
             {{-- post.phpに書いたので下記を短縮できる
-            <img src="{{ Storage::url('images/posts/' . $post->image) }}" alt="" class="mb-4"> --}}
+            <Storageにおいておくと、Viewの画面を変えるたびに画像を呼び出すので手間。
+            下記にすることで、modelに画像を保管し、処理が簡単になる。
+            img src="{{ Storage::url('images/posts/' . $post->image) }}" alt="" class="mb-4"> --}}
             {{-- Post.phpに書いたので()不要。<img src="{{ $post->image_url() }}" alt="" class="mb-4"> --}}
             <img src="{{ $post->image_url }}" alt="" class="mb-4">
             <p class="text-gray-700 text-base">{!! nl2br(e($post->body)) !!}</p>

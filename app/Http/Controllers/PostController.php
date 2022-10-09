@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-// use Illuminate\Http\Request;
 use App\Http\Requests\PostRequest;
 use App\Models\Post;
 use Illuminate\Support\Facades\DB;
@@ -17,11 +16,13 @@ class PostController extends Controller
      */
     public function index()
     {
-        //    $posts = Post::all();
+        $posts = Post::all();
+        // dd($posts);
         // created_atの降順でデータを取得     latest 
         // simplePaginate 前後 1ページに表示する件数を制限し、ページ下部にページネーション
         // pagename       1/2  1ページに表示する件数を制限し、ページ下部にページネーション
         // model-post.php-publicにおける
+        // PostモデルPost::with('userというリレイションを使って') 
         // function user(←リレイション名) return $this->belongsTo(User::class); でリレイション名を作った
         //       UserのhasMany    'foreign_key', 'other_key'(id)を削除
         $posts = Post::with('user')->latest()->paginate(4);
@@ -49,31 +50,37 @@ class PostController extends Controller
         //fillableをpost.phpに設定。
         //fillable〜〜でなく、
         //$post = new Post($request->all());で
-        // $request->all()がfillableの意味。
+        // Postモデルの実態化。その中身入り。$request->all()がfillableの意味。
+        // create postsの画面http://localhost/posts/createで画像以外 新規の場合はid来てない。フォームにナシ
         $post = new Post($request->all());
-        //                 認証したユーザー  そのID
+        //              csrfで認証済み→認証したユーザー  そのID
+        //  画像以外              user() ユーザーの情報を取ってくるメソッド名 決まり
         $post->user_id = $request->user()->id;
-        // ？
+        //https://laraweb.net/tutorial/2707/ 
+        // アップロードしたファイルの取得
+        // create.bladeの <input type="file" name="image"
+        // fileはtype属性。imageはname属性。 
+        // 画像を取得   $file input typeのfile = $request->file(input nameの'image');
         $file = $request->file('image');
         // ファイル名を保存  取得したときの年月日時分秒      ファイル名を取得
         //取得したときの年月日時分秒で同じファイル名が投稿されても別に保存できるように
         //$post->image = date('YmdHis') . '_' . $file->getClientOriginalName();
         //一番下のアクションにprivate static function createFileNameを追加したことで、
-        //ファイル名作成方法を変更するときに1箇所アクションを変えるだけでOK
+        //ファイル名だけ作って中身なし。中身は仮置においてある。  ファイル名作成方法を変更するときに1箇所アクションを変えるだけでOK
         $post->image = self::createFileName($file);
         // トランザクション開始
         DB::beginTransaction();
         try {
-            // 登録
+            // タイトル。本文、写真のファイル名を保存
             $post->save();
 
-            // 画像アップロード
+            // 写真本体保存に失敗した時   putFileファイルを送るAs名前を贈る 
             if (!Storage::putFileAs('images/posts', $file, $post->image)) {
                 // 例外を投げてロールバックさせる
                 //newある！インスタンス化だ！！＄\Exception = new \Exception;
                 throw new \Exception('画像ファイルの保存に失敗しました。');
             }
-            // トランザクション終了(成功)
+            // 写真本体に保存 トランザクション終了(成功)
             DB::commit();
 
             //$e = Exception
@@ -101,7 +108,7 @@ class PostController extends Controller
     {
         // $post = Post::find($id);
         // ユーザー情報も取得できる 
-        $post = Post::with(['user'])->find($id);
+        $post = Post::with('user')->find($id);
         // データを取得してくる
         // withはデータを取った後は使えないので 
         // load(['user'])で後からユーザー情報を取得 Eager loading(N＋1問題)の解決のために必要。
@@ -145,9 +152,11 @@ class PostController extends Controller
         }
         // updateされているか
         $file = $request->file('image');
+        // ふぁいるがあるかどうか、あれば処理
         if ($file) {
             // $delete_file_path = 'images/posts/' . $post->image;
             // Modelに定義済。詳細はdestory確認
+            // ファイルが有れば、削除用のファイル名・場所を決めている
             $delete_file_path = $post->image_path;
 
             //新しいファイル名を追加。新規作成と同じ方法。
@@ -164,7 +173,9 @@ class PostController extends Controller
 
             if ($file) {
                 // 画像アップロード
-                if (!Storage::putFileAs('images/posts', $file, $post->image)) {
+                $chk = Storage::putFileAs('images/posts', $file, $post->image);
+                
+                if (!$chk) {
                     // 例外を投げてロールバックさせる。 throw new \Exceptionでエラーを出す。
                     throw new \Exception('画像ファイルの保存に失敗しました。');
                 }

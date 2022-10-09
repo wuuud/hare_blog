@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CommentRequest;
 use App\Models\Comment;
 use App\Models\Post;
+use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
@@ -67,7 +68,8 @@ class CommentController extends Controller
             return back()->withInput()->withErrors($th->getMessage());
         }
 
-        return redirect()->route('posts.show', $post)
+        return redirect()
+            ->route('posts.show', $post)
             ->with('notice', 'コメントを登録しました');
     }
 
@@ -104,7 +106,8 @@ class CommentController extends Controller
     {
         //なりすましを確認             updateの内容は＄comment
         if ($request->user()->cannot('update', $comment)) {
-            return redirect()->route('posts.show', $post)
+            return redirect()
+                ->route('posts.show', $post)
                 ->withErrors('自分のコメント以外は更新できません');
         }
         
@@ -135,13 +138,35 @@ class CommentController extends Controller
      * @param  \App\Models\Comment  $comment
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Comment $comment)
+    public function destroy(Request $request, Post $post, Comment $comment)
     {
-        //
+        //上記はRequest $requestでバリデーションは
+        //                   ’delete’でpolicyのdeleteに飛んでいってる
+        //なりすましを確認             deleteの権限はありますか？
+        // できない場合はtrueで実行
+        if ($request->user()->cannot('delete', $comment)) {
+            return redirect()
+                ->route('posts.show', $post)
+                ->withErrors('自分のコメント以外は削除できません');
+        }
+        
+
+        // トランザクション開始 DB::beginTransaction();
+        try {
+            $comment->delete();
+
+            // トランザクション終了(成功) DB::commit();
+        } catch (\Exception $e) {
+            // トランザクション終了(失敗) DB::rollback();
+            return back()->withInput()->withErrors($e->getMessage());
+        }
+
+        return redirect()->route('posts.index')
+            ->with('notice', 'コメントを削除しました');
     }
 
-    private static function createFileName($file)
-    {
-        return date('YmdHis') . '_' . $file->getClientOriginalName();
-    }
+    // private static function createFileName($file)
+    // {
+    //     return date('YmdHis') . '_' . $file->getClientOriginalName();
+    // }
 }
