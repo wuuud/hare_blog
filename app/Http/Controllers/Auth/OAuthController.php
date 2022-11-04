@@ -61,7 +61,9 @@ class OAuthController extends Controller
         }
         // ログイン
         Auth::login($user);
-        // webphp
+        // app/http/providers/RouteServiceProvider
+        // class RouteServiceProvider extends ServiceProvider
+        // public const HOME = '/';
         return redirect(RouteServiceProvider::HOME);
     }
 }
